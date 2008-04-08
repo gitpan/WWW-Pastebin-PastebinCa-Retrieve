@@ -6,5 +6,7 @@ lib/WWW/Pastebin/PastebinCa/Retrieve.pm
 t/00-load.t
 t/pod-coverage.t
 t/pod.t
+t/kwalitee.t
+examples/retrieve.pl
 Makefile.PL
 META.yml
