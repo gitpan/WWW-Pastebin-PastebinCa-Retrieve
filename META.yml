@@ -1,23 +1,25 @@
 ---
-name: WWW-Pastebin-PastebinCa-Retrieve
-version: 0.002
+abstract: 'a module to retrieve pastes from http://pastebin.ca/ website'
 author:
   - 'Zoffix Znet <zoffix@cpan.org>'
-abstract: a module to retrieve pastes from http://pastebin.ca/ website
+build_requires:
+  Test::More: 0
+configure_requires:
+  Module::Build: 0.36
+generated_by: 'Module::Build version 0.3607'
 license: perl
-resources:
-  license: http://dev.perl.org/licenses/
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: WWW-Pastebin-PastebinCa-Retrieve
+provides:
+  WWW::Pastebin::PastebinCa::Retrieve:
+    file: lib/WWW/Pastebin/PastebinCa/Retrieve.pm
+    version: 0.003
 requires:
   HTML::Entities: 1.35
   HTML::TokeParser::Simple: 3.15
   WWW::Pastebin::Base::Retrieve: 0.001
-build_requires:
-  Test::More: 0
-provides:
-  WWW::Pastebin::PastebinCa::Retrieve:
-    file: lib/WWW/Pastebin/PastebinCa/Retrieve.pm
-    version: 0.002
-generated_by: Module::Build version 0.2808
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.003

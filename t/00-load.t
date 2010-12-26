@@ -2,15 +2,16 @@
 
 use strict;
 use warnings;
-use Test::More tests => 22;
+use Test::More tests => 19;
 
 my $ID = '931145';
 my $PASTE_DUMP = {
-          'language' => 'Perl Source',
-          'content' => "{\r\n\ttrue => sub { 1 },\r\n\tfalse => sub { 0 },\r\n\ttime  => scalar localtime(),\r\n}",
-          'post_date' => 'Thursday, March 6th, 2008 at 4:57:44pm MST',
-          'name' => 'Zoffix',
-};
+            "language" => "Perl Source",
+            "desc" => "perl stuff",
+            "content" => "{\r\n\ttrue => sub { 1 },\r\n\tfalse => sub { 0 },\r\n\ttime  => scalar localtime(),\r\n}",
+            "post_date" => "Thursday, March 6th, 2008 at 4:57:44pm MST",
+            "name" => "Zoffix"
+          };
 
 BEGIN {
     use_ok('WWW::Pastebin::Base::Retrieve');
@@ -41,16 +42,10 @@ SKIP: {
     my $ret = $paster->retrieve($ID)
         or skip "Got error on ->retrieve($ID): " . $paster->error, 16;
 
-    # this one will be constantly changing... get rid of it
-    my $age = delete $ret->{age};
-    ok( defined $age, '{age} in $ret');
-
     SKIP: {
         my $ret2 = $paster->retrieve("http://pastebin.ca/$ID")
             or skip "Got error on ->retrieve('http://pastebin.ca/$ID'): "
                         . $paster->error, 3;
-        ok( exists $ret2->{age}, '->{age} in $ret2' );
-        ok( defined delete $ret2->{age}, '->{age} is defined in $ret2');
         is_deeply(
             $ret,
             $ret2,

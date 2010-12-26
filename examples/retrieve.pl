@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use lib qw(lib);
 
 die "Usage: perl retrieve.pl <paste_ID_or_URI>\n"
     unless @ARGV;
@@ -16,10 +17,8 @@ my $paster = WWW::Pastebin::PastebinCa::Retrieve->new;
 my $content_ref = $paster->retrieve( $Paste )
     or die "Failed to retrieve paste $Paste: " . $paster->error;
 
-printf "Posted on %s, titled %s and aged %s\n\n%s\n",
-         @$content_ref{ qw(post_date  name  age  content ) };
+printf qq|Posted on "%s", titled "%s" and description|
+            . qq| is "%s"\n\n%s\n|,
+         @$content_ref{ qw(post_date  name  desc  content ) };
 
-use Data::Dumper;
-print Dumper $content_ref;
-
-         print "Content: \n$paster\n";
+print "Content: \n$paster\n";

@@ -3,7 +3,7 @@ package WWW::Pastebin::PastebinCa::Retrieve;
 use warnings;
 use strict;
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 use base 'WWW::Pastebin::Base::Retrieve';
 use HTML::TokeParser::Simple;
@@ -31,14 +31,17 @@ sub _parse {
     my %data;
     my %nav = (
         level       => 0,
+        get_lang    => 0,
         get_name    => 0,
         get_date    => 0,
+        get_desc    => 0,
     );
     while ( my $t = $parser->get_token ) {
         if ( $t->is_start_tag('h2')
-            and defined $t->get_attr('class')
-            and $t->get_attr('class') eq 'first'
+            #and defined $t->get_attr('class')
+            #and $t->get_attr('class') eq 'first'
         ) {
+                
             $nav{level} = 1;
         }
         elsif ( $nav{level} == 1 and $t->is_start_tag('dt') ) {
@@ -48,6 +51,15 @@ sub _parse {
             $data{name} = $t->as_is;
             $nav{get_name} = 0;
         }
+        elsif ( $t->is_start_tag('p') and defined $t->get_attr('id')
+            and $t->get_attr('id') eq 'des'
+        ) {
+            $nav{get_desc} = 1;
+        }
+        elsif ( $nav{get_desc} and $t->is_text ) {
+            $data{desc} = $t->as_is;
+            $nav{get_desc} = 0;
+        }
         elsif ( $nav{level} == 2 and $t->is_start_tag('dd') ) {
             $nav{get_date} = 1;
             $nav{level}++;
@@ -55,37 +67,37 @@ sub _parse {
         elsif ( $nav{get_date} and $t->is_text ) {
             $data{post_date} = $t->as_is;
             $data{post_date} =~ s/\s+/ /g;
-            $nav{get_date} = 0;
-            $nav{level}++;
-        }
-        elsif ( ( $nav{level} == 4
-                  or $nav{level} == 5
-                )
-             and $t->is_start_tag('dt')
-        ) {
-            $nav{level}++;
-        }
-        elsif ( $nav{level} == 6 and $t->is_text ) {
-            $data{language} = $t->as_is;
-            $data{language} =~ s/Language:\s+//;
-            $nav{level}++;
+            $data{post_date} =~ s/&nbsp;//g;
+            $nav{get_date}   = 0;
+            $nav{level} = 7;
         }
         elsif ( $nav{level} == 7 and $t->is_start_tag('span') ) {
             $nav{level}++;
         }
-        elsif ( $nav{level} == 8 and $t->is_text ) {
-            $data{age} = $t->as_is;
-            $data{age} =~ s/Age:\s+//;
-            $nav{level}++;
-        }
-        elsif ( $t->is_start_tag('textarea') ) {
+        elsif ( $t->is_start_tag('textarea')
+            and defined $t->get_attr('name')
+            and $t->get_attr('name') eq 'content' ) {
             $nav{get_paste} = 1;
         }
         elsif ( $nav{get_paste} and $t->is_text ) {
             $data{content} = $t->as_is;
+            $nav{get_paste} = 0;
+            $nav{get_lang} = 1;
+        }
+        elsif ( $nav{get_lang} == 1 and  $t->is_start_tag('select') ) {
+            $nav{get_lang} = 2;
+        }
+        elsif ( $nav{get_lang} == 2 and $t->is_start_tag('option')
+            and $t->get_attr('selected')
+        ) {
+            $nav{get_lang} = 3;
+        }
+        elsif ( $nav{get_lang} == 3 and $t->is_text ) {
+            $data{language} = $t->as_is;
             $nav{success} = 1;
             last;
         }
+
     }
     unless ( $nav{success} ) {
         my $message = "Failed to parse paste.. ";
@@ -107,6 +119,11 @@ __END__
 =head1 NAME
 
 WWW::Pastebin::PastebinCa::Retrieve - a module to retrieve pastes from http://pastebin.ca/ website
+
+=head1 CHANGES FROM EARLIER VERSIONS
+
+Due to the change on the pastebin, as of version 0.003, the description
+of the paste is available, while the "age" is no longer.
 
 =head1 SYNOPSIS
 
@@ -185,7 +202,7 @@ On success returns a hashref with the following keys/values:
           'content' => 'blah blah content of the paste',
           'post_date' => 'Friday, March 21st, 2008 at 1:05:19pm MDT',
           'name' => 'Unnamed',
-          'age' => '13 mins 50 secs'
+          'desc' => 'Perl stuff'
     };
 
 =over 14
@@ -214,11 +231,11 @@ The date when the paste was created
 
 Tha name of the poster or the title of the paste.
 
-=item age
+=item desc
 
-    { 'age' => '17 hrs 43 mins' }
+    { 'desc' => 'Perl stuff' }
 
-The age of the paste (how long ago it was created).
+Contains description of the paste.
 
 =back
 
@@ -284,7 +301,7 @@ L<LWP::UserAgent>, L<URI>
 =head1 AUTHOR
 
 Zoffix Znet, C<< <zoffix at cpan.org> >>
-(L<http://zoffix.com>, L<http://haslayout.net>)
+(L<http://zoffix.com>, L<http://haslayout.net>, L<http://mind-power-book.com>)
 
 =head1 BUGS
 
